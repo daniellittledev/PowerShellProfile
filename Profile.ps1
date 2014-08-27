@@ -1,5 +1,9 @@
+. "$(Split-Path $Profile)\Settings.ps1"
+
+$env:path += ";" + ($Settings.Path -Join ";")
+
 function Open($path) {
-    explorer $path
+    Explorer $path
 }
 
 function Edit {
@@ -12,7 +16,7 @@ function Edit {
     )
 
     Process {
-        $app = "C:\Program Files (x86)\Notepad++\notepad++.exe"
+        $app = $Settings.TextEditor
 
         if ($File -ne $null) {
             $parameters = '"' + $File + '"'
@@ -29,7 +33,7 @@ function Edit {
 }
 
 # This was already here
-function elevate-process
+function Elevate-Process
 {
     $file, [string]$arguments = $args;
     $psi = new-object System.Diagnostics.ProcessStartInfo $file;
@@ -39,17 +43,15 @@ function elevate-process
     $psi.WorkingDirectory = get-location;
     [System.Diagnostics.Process]::Start($psi);
 }
-set-alias sudo elevate-process;
+Set-Alias sudo elevate-process;
 
-
-# WebGet
-function get-html([string]$url)
+function Get-WebContent([string]$url)
 {
     $webClient = (New-Object System.Net.WebClient);
     $webClient.DownloadString($url);
 }
 
-function shorten-path([string] $path) { 
+function Shorten-Path([string] $path) { 
    $loc = $path.Replace($HOME, '~') 
    # remove prefix for UNC paths
    $loc = $loc -replace '^[^:]+::', ''
@@ -58,7 +60,7 @@ function shorten-path([string] $path) {
    return ($loc -replace '\\(\.?)([^\\])[^\\]*(?=\\)','\$1$2') 
 }
 
-function prompt { 
+function Prompt { 
     # our theme
     $cdelim = [ConsoleColor]::DarkCyan 
     $chost = [ConsoleColor]::Green 
@@ -73,37 +75,9 @@ function prompt {
     return '> '
 }
 
-# gci . *.cs -Recurse | select-string . | Group Filename | Measure-Object Count -Min -Max -Average
-function CountLines($directory)
-{
-    $pattern = "*.cs"
-    $directories = [System.IO.Directory]::GetDirectories($directory)
-    $files = [System.IO.Directory]::GetFiles($directory, $pattern)
-
-    $lineCount = 0
-
-    foreach($file in $files) {
-        $lineCount += [System.IO.File]::ReadAllText($file).Split("`n").Count
-    }
-
-    foreach($subdirectory in $directories) {
-        $lineCount += CountLines $subdirectory
-    }
-
-    $lineCount
-}
-
-$msbuildPath = "C:\Windows\Microsoft.NET\Framework\v4.0.30319\"
-$gitPath = (Get-Item "Env:LocalAppData").Value + "\GitHub\PortableGit_93e8418133eb85e81a81e5e19c272776524496c6\cmd\"
-
-$env:path += ";$gitPath;$msbuildPath;"
-
-
 function Enable-Git {
     .  "$(Split-Path $profile)\Modules\posh-git\profile.example.ps1"
 }
-
-#Write-Host "For git use 'Enable-Git'"
 
 function Load-Profile
 {
