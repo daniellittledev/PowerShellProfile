@@ -4,6 +4,14 @@ $files = @(
 )
 
 $files | % {
+	
+	New-Item -Type Directory -Name (Split-Path $_.Name) -Force
+	
+	$fileName = (Split-Path $_.Name -Leaf)
+	if (!(Test-Path $fileName)) {
+		New-Item -Type File -Name $fileName
+	}
+	
 	(new-object net.webclient).DownloadString($_.Url) | Set-Content $_.Name -Force
 }
 
