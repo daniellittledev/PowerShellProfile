@@ -3,16 +3,21 @@ $files = @(
 	@{ Name = "$(Split-Path $Profile)\Settings.ps1"; Url = "https://raw.githubusercontent.com/Lavinski/PowerShellProfile/master/Settings.ps1" }
 )
 
+$wc = New-Object System.Net.WebClient
+$wc.Proxy.Credentials = [System.Net.CredentialCache]::DefaultNetworkCredentials
+
 $files | % {
 	
-	New-Item -Type Directory -Name (Split-Path $_.Name) -Force
+	$path = (Split-Path $_.Name)
+	
+	New-Item -Type Directory -Path $path -Force
 	
 	$fileName = (Split-Path $_.Name -Leaf)
 	if (!(Test-Path $fileName)) {
 		New-Item -Type File -Name $fileName
 	}
 	
-	(new-object net.webclient).DownloadString($_.Url) | Set-Content $_.Name -Force
+	$wc.DownloadString($_.Url) | Set-Content $_.Name -Force
 }
 
 # Reload Profile

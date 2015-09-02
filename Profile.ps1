@@ -45,9 +45,16 @@ function Elevate-Process
 }
 Set-Alias sudo elevate-process;
 
+function Get-WebClient()
+{
+    $wc = New-Object System.Net.WebClient
+    $wc.Proxy.Credentials = [System.Net.CredentialCache]::DefaultNetworkCredentials
+    return $wc
+}
+
 function Get-WebContent([string]$url)
 {
-    $webClient = (New-Object System.Net.WebClient);
+    $webClient = Get-WebClient
     $webClient.DownloadString($url);
 }
 
